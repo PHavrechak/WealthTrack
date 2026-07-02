@@ -54,3 +54,13 @@ class MonthlyGoalResponse(BaseModel):
     target_investment_amount: Decimal
     created_at: datetime
     updated_at: datetime
+
+
+class AvailableToSpendResponse(BaseModel):
+    month: int
+    year: int
+    total_income: Decimal
+    total_expenses: Decimal
+    target_investment_amount: Decimal
+    has_goal_defined: bool
+    available_to_spend: Decimal
