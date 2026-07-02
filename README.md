@@ -89,6 +89,7 @@ Crie um arquivo `.env.local` dentro de `frontend/` com:
 ```
 VITE_SUPABASE_URL=sua_url_aqui
 VITE_SUPABASE_PUBLISHABLE_KEY=sua_chave_publicavel_aqui
+VITE_API_BASE_URL=http://localhost:8000
 ```
 
 Suba o servidor:
@@ -106,8 +107,8 @@ Roadmap dividido em 8 etapas (1–6 compõem o MVP demonstrável; 7–8 são dif
 - [x] Etapa 1 — Setup do ambiente e scaffold do projeto
 - [x] Etapa 2 — Autenticação (login, cadastro, rota protegida)
 - [x] Etapa 3 — Modelagem de dados e CRUD (categorias, transações, meta mensal)
-- [ ] Etapa 4 — Telas do frontend consumindo os endpoints
-- [ ] Etapa 5 — Card "disponível para gastar" em tempo real
+- [x] Etapa 4 — Telas do frontend consumindo os endpoints
+- [x] Etapa 5 — Card "disponível para gastar" em tempo real
 - [ ] Etapa 6 — Relatórios de padrão de gasto
 - [ ] Etapa 7 — Detector de inflação de estilo de vida
 - [ ] Etapa 8 — Análise assistida por IA
