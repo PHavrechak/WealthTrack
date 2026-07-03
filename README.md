@@ -20,7 +20,8 @@ Planilhas e apps de finanças tradicionais mostram *o que já aconteceu*. O Weal
 - Registro de transações
 - Definição de meta de investimento mensal
 - Card "disponível para gastar" em tempo real
-- Relatórios de padrão de gasto
+- Insights em linguagem natural sobre tendência de gastos (regras
+  determinísticas — comparação percentual, limiar e projeção linear, sem IA)
 
 **Diferenciais futuros:**
 - Detector de inflação de estilo de vida (alerta quando o crescimento de despesas supera o crescimento de renda)
@@ -79,6 +80,12 @@ uvicorn main:app --reload
 ```
 Docs interativos disponíveis em `http://127.0.0.1:8000/docs`.
 
+*(Opcional)* Para popular um usuário com 9 meses de histórico simulado e ver
+os insights funcionando:
+```bash
+python scripts/seed_demo_data.py <user_id>   # user_id em Authentication > Users no Supabase
+```
+
 ### 3. Frontend
 ```bash
 cd frontend
@@ -109,8 +116,9 @@ Roadmap dividido em 8 etapas (1–6 compõem o MVP demonstrável; 7–8 são dif
 - [x] Etapa 3 — Modelagem de dados e CRUD (categorias, transações, meta mensal)
 - [x] Etapa 4 — Telas do frontend consumindo os endpoints
 - [x] Etapa 5 — Card "disponível para gastar" em tempo real
-- [ ] Etapa 6 — Relatórios de padrão de gasto
-- [ ] Etapa 7 — Detector de inflação de estilo de vida
+- [x] Etapa 6 — Motor de tendência + insights em linguagem natural (inclui
+  detecção de inflação de estilo de vida por regras determinísticas)
+- [ ] Etapa 7 — Evolução do detector de inflação de estilo de vida
 - [ ] Etapa 8 — Análise assistida por IA
 
 ## Licença
