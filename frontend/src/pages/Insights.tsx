@@ -68,7 +68,7 @@ export function Insights() {
 
   return (
     <AppLayout>
-      <div className="mx-auto flex max-w-4xl flex-col gap-8">
+      <div className="mx-auto flex w-full max-w-[960px] flex-col gap-8">
         <div className="flex items-baseline justify-between">
           <h1 className="font-serif text-2xl tracking-tight">Insights</h1>
           {data && data.sufficient_data && (

@@ -19,7 +19,7 @@ function currentPeriod() {
   return { month: now.getMonth() + 1, year: now.getFullYear() }
 }
 
-function formatCurrency(value: string) {
+function formatCurrency(value: string | number) {
   return Number(value).toLocaleString('pt-BR', {
     style: 'currency',
     currency: 'BRL',
@@ -63,6 +63,26 @@ export function Transactions() {
     () => categories.filter((category) => category.type === type),
     [categories, type],
   )
+
+  // soma de gastos por categoria do período filtrado, em centavos (evita
+  // drift de float), da maior para a menor — alimenta o painel de resumo
+  const expenseSummary = useMemo(() => {
+    const totals = new Map<string, number>()
+    for (const transaction of transactions) {
+      if (transaction.type !== 'expense') {
+        continue
+      }
+      const name =
+        (transaction.category_id &&
+          categoriesById.get(transaction.category_id)?.name) ||
+        'Sem categoria'
+      const cents = Math.round(Number(transaction.amount) * 100)
+      totals.set(name, (totals.get(name) ?? 0) + cents)
+    }
+    return [...totals.entries()]
+      .map(([name, cents]) => ({ name, total: cents / 100 }))
+      .sort((a, b) => b.total - a.total)
+  }, [transactions, categoriesById])
 
   const load = async (targetMonth: number, targetYear: number) => {
     setLoading(true)
@@ -138,10 +158,10 @@ export function Transactions() {
 
   return (
     <AppLayout>
-      <div className="mx-auto flex max-w-4xl flex-col gap-8">
+      <div className="mx-auto flex w-full max-w-[1140px] flex-col gap-8">
         <div className="flex flex-wrap items-baseline justify-between gap-4">
           <h1 className="font-serif text-2xl tracking-tight">Transações</h1>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <label htmlFor="period" className="text-sm text-ink-muted">
               Período
             </label>
@@ -261,7 +281,8 @@ export function Transactions() {
             acima.
           </p>
         ) : (
-          <ul className="border border-hairline bg-card">
+          <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
+            <ul className="border border-hairline bg-card">
             {transactions.map((transaction, position) => {
               const category = transaction.category_id
                 ? categoriesById.get(transaction.category_id)
@@ -311,7 +332,40 @@ export function Transactions() {
                 </li>
               )
             })}
-          </ul>
+            </ul>
+
+            <aside className="border border-hairline bg-card p-5">
+              <h2 className="mb-4 font-serif text-sm tracking-wide text-ink-muted uppercase">
+                Resumo do período
+              </h2>
+              {expenseSummary.length === 0 ? (
+                <p className="text-sm text-ink-muted">
+                  Nenhum gasto neste período.
+                </p>
+              ) : (
+                <ul className="flex flex-col gap-3">
+                  {expenseSummary.map((entry) => (
+                    <li key={entry.name}>
+                      <div className="flex items-baseline justify-between gap-2 text-sm">
+                        <span className="truncate text-ink">{entry.name}</span>
+                        <span className="font-mono text-ink">
+                          {formatCurrency(entry.total)}
+                        </span>
+                      </div>
+                      <div className="mt-1.5 h-[3px] w-full bg-hairline/40">
+                        <div
+                          className="h-full bg-brass"
+                          style={{
+                            width: `${(entry.total / expenseSummary[0].total) * 100}%`,
+                          }}
+                        />
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </aside>
+          </div>
         )}
       </div>
     </AppLayout>

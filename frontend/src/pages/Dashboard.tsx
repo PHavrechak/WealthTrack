@@ -3,7 +3,22 @@ import { Link } from 'react-router-dom'
 import { AppLayout } from '../components/AppLayout'
 import { getMonthlyGoal, upsertMonthlyGoal } from '../api/monthlyGoals'
 import { getAvailableToSpend } from '../api/dashboard'
-import type { AvailableToSpend, MonthlyGoal } from '../types'
+import { getInsights } from '../api/insights'
+import type {
+  AvailableToSpend,
+  Insight,
+  InsightSeverity,
+  MonthlyGoal,
+} from '../types'
+
+const insightSeverityStyles: Record<
+  InsightSeverity,
+  { accent: string; text: string; label: string }
+> = {
+  info: { accent: 'border-l-positive', text: 'text-positive', label: 'Informativo' },
+  attention: { accent: 'border-l-brass', text: 'text-brass', label: 'Atenção' },
+  alert: { accent: 'border-l-negative', text: 'text-negative', label: 'Alerta' },
+}
 
 function currentPeriod() {
   const now = new Date()
@@ -102,6 +117,8 @@ export function Dashboard() {
   const [available, setAvailable] = useState<AvailableToSpend | null>(null)
   const [availableLoading, setAvailableLoading] = useState(true)
 
+  const [topInsight, setTopInsight] = useState<Insight | null>(null)
+
   const [editing, setEditing] = useState(false)
   const [targetAmount, setTargetAmount] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -133,9 +150,25 @@ export function Dashboard() {
     }
   }
 
+  const loadTopInsight = async () => {
+    try {
+      const data = await getInsights()
+      // o backend já ordena por severidade; o primeiro é o mais relevante
+      setTopInsight(
+        data.sufficient_data && data.insights.length > 0
+          ? data.insights[0]
+          : null,
+      )
+    } catch {
+      // sem dados suficientes ou erro: o card simplesmente não aparece
+      setTopInsight(null)
+    }
+  }
+
   useEffect(() => {
     loadGoal()
     loadAvailable()
+    loadTopInsight()
   }, [])
 
   const startEditing = () => {
@@ -174,7 +207,7 @@ export function Dashboard() {
 
   return (
     <AppLayout>
-      <div className="mx-auto flex max-w-4xl flex-col gap-8">
+      <div className="mx-auto flex w-full max-w-[960px] flex-col gap-8">
         <div className="flex items-baseline justify-between">
           <h1 className="font-serif text-2xl tracking-tight">Dashboard</h1>
           <span className="font-serif text-sm text-ink-muted">
@@ -341,10 +374,24 @@ export function Dashboard() {
           )}
         </div>
 
-        <p className="text-ink-muted">
-          Mais métricas em breve — relatórios de padrão de gasto chegam nas
-          próximas etapas.
-        </p>
+        {topInsight && (
+          <div
+            className={`border border-hairline border-l-2 ${insightSeverityStyles[topInsight.severity].accent} bg-card p-5`}
+          >
+            <p
+              className={`mb-2 font-mono text-xs tracking-widest uppercase ${insightSeverityStyles[topInsight.severity].text}`}
+            >
+              {insightSeverityStyles[topInsight.severity].label}
+            </p>
+            <p className="text-ink">{topInsight.message}</p>
+            <Link
+              to="/insights"
+              className="mt-3 inline-block text-sm text-brass transition hover:text-brass/80"
+            >
+              Ver todos os insights →
+            </Link>
+          </div>
+        )}
       </div>
     </AppLayout>
   )

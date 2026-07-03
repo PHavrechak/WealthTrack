@@ -81,7 +81,7 @@ export function Categories() {
 
   return (
     <AppLayout>
-      <div className="mx-auto flex max-w-4xl flex-col gap-8">
+      <div className="mx-auto flex w-full max-w-[960px] flex-col gap-8">
         <h1 className="font-serif text-2xl tracking-tight">Categorias</h1>
 
         {error && (
