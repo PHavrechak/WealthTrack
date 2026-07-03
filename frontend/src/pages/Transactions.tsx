@@ -7,6 +7,7 @@ import {
 } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { AppLayout } from '../components/AppLayout'
+import { ConfirmDialog } from '../components/ConfirmDialog'
 import { listCategories } from '../api/categories'
 import {
   createTransaction,
@@ -164,8 +165,12 @@ export function Transactions() {
     }
   }
 
-  const handleDelete = async (transaction: Transaction) => {
-    if (!window.confirm('Excluir esta transação?')) {
+  const [pendingDelete, setPendingDelete] = useState<Transaction | null>(null)
+
+  const handleDelete = async () => {
+    const transaction = pendingDelete
+    setPendingDelete(null)
+    if (!transaction) {
       return
     }
     setError(null)
@@ -181,6 +186,17 @@ export function Transactions() {
       setDeletingId(null)
     }
   }
+
+  const pendingDeleteDescription = pendingDelete
+    ? `${
+        pendingDelete.description ||
+        (pendingDelete.category_id &&
+          categoriesById.get(pendingDelete.category_id)?.name) ||
+        'Sem descrição'
+      } — ${formatCurrency(pendingDelete.amount)} em ${new Date(
+        `${pendingDelete.transaction_date}T00:00:00`,
+      ).toLocaleDateString('pt-BR')}`
+    : undefined
 
   return (
     <AppLayout>
@@ -382,7 +398,7 @@ export function Transactions() {
                   </span>
                   <button
                     type="button"
-                    onClick={() => handleDelete(transaction)}
+                    onClick={() => setPendingDelete(transaction)}
                     disabled={deletingId === transaction.id}
                     className="text-sm text-ink-muted transition hover:text-negative disabled:opacity-50"
                   >
@@ -427,6 +443,14 @@ export function Transactions() {
           </div>
         )}
       </div>
+
+      <ConfirmDialog
+        open={pendingDelete !== null}
+        title="Excluir transação?"
+        description={pendingDeleteDescription}
+        onConfirm={handleDelete}
+        onCancel={() => setPendingDelete(null)}
+      />
     </AppLayout>
   )
 }

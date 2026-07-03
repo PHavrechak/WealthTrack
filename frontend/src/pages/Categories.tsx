@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { AppLayout } from '../components/AppLayout'
+import { ConfirmDialog } from '../components/ConfirmDialog'
 import { createCategory, deleteCategory, listCategories } from '../api/categories'
 import { ApiError } from '../lib/apiClient'
 import type { Category, CategoryType } from '../types'
@@ -52,8 +53,12 @@ export function Categories() {
     }
   }
 
-  const handleDelete = async (category: Category) => {
-    if (!window.confirm(`Excluir a categoria "${category.name}"?`)) {
+  const [pendingDelete, setPendingDelete] = useState<Category | null>(null)
+
+  const handleDelete = async () => {
+    const category = pendingDelete
+    setPendingDelete(null)
+    if (!category) {
       return
     }
     setError(null)
@@ -137,19 +142,31 @@ export function Categories() {
               title="Receitas"
               accentClass="text-positive"
               categories={incomeCategories}
-              onDelete={handleDelete}
+              onDelete={setPendingDelete}
               deletingId={deletingId}
             />
             <CategoryColumn
               title="Despesas"
               accentClass="text-negative"
               categories={expenseCategories}
-              onDelete={handleDelete}
+              onDelete={setPendingDelete}
               deletingId={deletingId}
             />
           </div>
         )}
       </div>
+
+      <ConfirmDialog
+        open={pendingDelete !== null}
+        title="Excluir categoria?"
+        description={
+          pendingDelete
+            ? `A categoria "${pendingDelete.name}" será removida. Se houver transações vinculadas a ela, a exclusão será bloqueada.`
+            : undefined
+        }
+        onConfirm={handleDelete}
+        onCancel={() => setPendingDelete(null)}
+      />
     </AppLayout>
   )
 }

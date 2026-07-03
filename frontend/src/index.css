@@ -29,3 +29,13 @@ body {
   margin: 0;
   @apply bg-paper font-sans text-ink;
 }
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.fade-in {
+  animation: fade-in 150ms ease-out;
+}
