@@ -7,6 +7,7 @@ import { Dashboard } from './pages/Dashboard'
 import { Categories } from './pages/Categories'
 import { Transactions } from './pages/Transactions'
 import { Insights } from './pages/Insights'
+import { ImportCsv } from './pages/ImportCsv'
 
 function Root() {
   const { user, loading } = useAuth()
@@ -49,6 +50,14 @@ function App() {
         element={
           <ProtectedRoute>
             <Transactions />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/transacoes/importar"
+        element={
+          <ProtectedRoute>
+            <ImportCsv />
           </ProtectedRoute>
         }
       />

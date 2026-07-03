@@ -83,3 +83,54 @@ class InsightsResponse(BaseModel):
     months_with_data: int
     sufficient_data: bool
     insights: list[InsightResponse]
+
+
+class ColumnMappingResponse(BaseModel):
+    date_column: str | None
+    description_column: str | None
+    amount_column: str | None
+    type_column: str | None
+
+
+class ImportPreviewRowResponse(BaseModel):
+    row_number: int
+    transaction_date: date | None
+    description: str
+    amount: Decimal | None
+    type: CategoryType | None
+    is_duplicate: bool
+    parse_error: str | None
+
+
+class ImportPreviewResponse(BaseModel):
+    columns: list[str]
+    suggested_mapping: ColumnMappingResponse
+    mapping_confident: bool
+    value_format: Literal["br", "intl"]
+    date_format: Literal["dmy", "iso"]
+    total_rows: int
+    rows: list[ImportPreviewRowResponse]
+
+
+class ImportTransactionItem(BaseModel):
+    transaction_date: date
+    description: str | None = None
+    amount: Decimal = Field(gt=0, max_digits=12, decimal_places=2)
+    type: CategoryType
+    category_id: UUID | None = None
+
+
+class ImportConfirmRequest(BaseModel):
+    transactions: list[ImportTransactionItem] = Field(max_length=1000)
+    skipped_count: int = Field(default=0, ge=0)
+
+
+class ImportErrorItem(BaseModel):
+    index: int
+    message: str
+
+
+class ImportConfirmResponse(BaseModel):
+    created: int
+    skipped: int
+    errors: list[ImportErrorItem]

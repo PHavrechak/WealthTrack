@@ -2,4 +2,5 @@ fastapi
 uvicorn[standard]
 pyjwt[crypto]
 python-dotenv
+python-multipart
 supabase

@@ -1,12 +1,28 @@
 from datetime import date
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import (
+    APIRouter,
+    Depends,
+    File,
+    Form,
+    HTTPException,
+    Query,
+    UploadFile,
+    status,
+)
 from supabase import Client
 
 from auth import get_current_user_id
 from database import get_supabase
-from schemas import TransactionCreate, TransactionResponse
+from schemas import (
+    ImportConfirmRequest,
+    ImportConfirmResponse,
+    ImportPreviewResponse,
+    TransactionCreate,
+    TransactionResponse,
+)
+from services import csv_import_service
 
 router = APIRouter(prefix="/transactions", tags=["transactions"])
 
@@ -62,6 +78,58 @@ def create_transaction(
     row = {**payload.model_dump(mode="json"), "user_id": user_id}
     result = db.table("transactions").insert(row).execute()
     return result.data[0]
+
+
+@router.post("/import/preview", response_model=ImportPreviewResponse)
+async def import_preview(
+    file: UploadFile = File(...),
+    date_column: str | None = Form(None),
+    description_column: str | None = Form(None),
+    amount_column: str | None = Form(None),
+    type_column: str | None = Form(None),
+    user_id: str = Depends(get_current_user_id),
+    db: Client = Depends(get_supabase),
+):
+    file_bytes = await file.read()
+    overrides = {
+        "date_column": date_column,
+        "description_column": description_column,
+        "amount_column": amount_column,
+        "type_column": type_column,
+    }
+    try:
+        preview = csv_import_service.parse_csv_preview(file_bytes, overrides)
+    except csv_import_service.CsvImportError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)
+        ) from exc
+
+    csv_import_service.detect_duplicates(db, user_id, preview.rows)
+    return {
+        "columns": preview.columns,
+        "suggested_mapping": preview.suggested_mapping,
+        "mapping_confident": preview.mapping_confident,
+        "value_format": preview.value_format,
+        "date_format": preview.date_format,
+        "total_rows": preview.total_rows,
+        "rows": preview.rows,
+    }
+
+
+@router.post("/import/confirm", response_model=ImportConfirmResponse)
+def import_confirm(
+    payload: ImportConfirmRequest,
+    user_id: str = Depends(get_current_user_id),
+    db: Client = Depends(get_supabase),
+):
+    created, errors = csv_import_service.bulk_create_transactions(
+        db, user_id, payload.transactions
+    )
+    return {
+        "created": created,
+        "skipped": payload.skipped_count,
+        "errors": [{"index": i, "message": message} for i, message in errors],
+    }
 
 
 @router.delete("/{transaction_id}", status_code=status.HTTP_204_NO_CONTENT)

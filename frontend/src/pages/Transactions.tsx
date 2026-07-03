@@ -5,6 +5,7 @@ import {
   type ChangeEvent,
   type FormEvent,
 } from 'react'
+import { Link } from 'react-router-dom'
 import { AppLayout } from '../components/AppLayout'
 import { listCategories } from '../api/categories'
 import {
@@ -162,6 +163,12 @@ export function Transactions() {
         <div className="flex flex-wrap items-baseline justify-between gap-4">
           <h1 className="font-serif text-2xl tracking-tight">Transações</h1>
           <div className="flex items-center gap-3">
+            <Link
+              to="/transacoes/importar"
+              className="border border-hairline px-3 py-2 text-sm text-ink-muted transition hover:border-ink-muted hover:text-ink"
+            >
+              Importar CSV
+            </Link>
             <label htmlFor="period" className="text-sm text-ink-muted">
               Período
             </label>

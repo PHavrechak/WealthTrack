@@ -59,3 +59,49 @@ export interface InsightsResponse {
   sufficient_data: boolean
   insights: Insight[]
 }
+
+export interface ColumnMapping {
+  date_column: string | null
+  description_column: string | null
+  amount_column: string | null
+  type_column: string | null
+}
+
+export interface ImportPreviewRow {
+  row_number: number
+  transaction_date: string | null
+  description: string
+  amount: string | null
+  type: CategoryType | null
+  is_duplicate: boolean
+  parse_error: string | null
+}
+
+export interface ImportPreviewResponse {
+  columns: string[]
+  suggested_mapping: ColumnMapping
+  mapping_confident: boolean
+  value_format: 'br' | 'intl'
+  date_format: 'dmy' | 'iso'
+  total_rows: number
+  rows: ImportPreviewRow[]
+}
+
+export interface ImportTransactionItem {
+  transaction_date: string
+  description: string | null
+  amount: string
+  type: CategoryType
+  category_id: string | null
+}
+
+export interface ImportError {
+  index: number
+  message: string
+}
+
+export interface ImportConfirmResponse {
+  created: number
+  skipped: number
+  errors: ImportError[]
+}
