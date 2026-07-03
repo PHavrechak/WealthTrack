@@ -64,3 +64,22 @@ class AvailableToSpendResponse(BaseModel):
     target_investment_amount: Decimal
     has_goal_defined: bool
     available_to_spend: Decimal
+
+
+class InsightDetailResponse(BaseModel):
+    label: str
+    value: str
+
+
+class InsightResponse(BaseModel):
+    type: str
+    severity: Literal["info", "attention", "alert"]
+    message: str
+    details: list[InsightDetailResponse]
+
+
+class InsightsResponse(BaseModel):
+    months_analyzed: int
+    months_with_data: int
+    sufficient_data: bool
+    insights: list[InsightResponse]

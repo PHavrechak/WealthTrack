@@ -28,6 +28,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
             <NavLink to="/transacoes" className={navLinkClass}>
               Transações
             </NavLink>
+            <NavLink to="/insights" className={navLinkClass}>
+              Insights
+            </NavLink>
           </nav>
         </div>
         <div className="flex items-center gap-4">

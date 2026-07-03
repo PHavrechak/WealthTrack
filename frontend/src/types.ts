@@ -38,3 +38,24 @@ export interface AvailableToSpend {
   has_goal_defined: boolean
   available_to_spend: string
 }
+
+export type InsightSeverity = 'info' | 'attention' | 'alert'
+
+export interface InsightDetail {
+  label: string
+  value: string
+}
+
+export interface Insight {
+  type: string
+  severity: InsightSeverity
+  message: string
+  details: InsightDetail[]
+}
+
+export interface InsightsResponse {
+  months_analyzed: number
+  months_with_data: number
+  sufficient_data: boolean
+  insights: Insight[]
+}

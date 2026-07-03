@@ -6,7 +6,7 @@ from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from auth import get_current_user
-from routers import categories, dashboard, monthly_goals, transactions
+from routers import categories, dashboard, insights, monthly_goals, transactions
 
 app = FastAPI(title="WealthTrack API")
 
@@ -22,6 +22,7 @@ app.include_router(categories.router)
 app.include_router(transactions.router)
 app.include_router(monthly_goals.router)
 app.include_router(dashboard.router)
+app.include_router(insights.router)
 
 
 @app.get("/health")
