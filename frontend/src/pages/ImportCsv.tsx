@@ -49,6 +49,14 @@ function isRowValid(row: EditableRow): boolean {
   return row.date !== '' && Number(row.amount) > 0
 }
 
+function formatMonthLabel(yearMonth: string) {
+  const [year, month] = yearMonth.split('-').map(Number)
+  return new Date(year, month - 1, 1).toLocaleDateString('pt-BR', {
+    month: 'long',
+    year: 'numeric',
+  })
+}
+
 export function ImportCsv() {
   const [step, setStep] = useState<1 | 2 | 3>(1)
   const [file, setFile] = useState<File | null>(null)
@@ -74,6 +82,19 @@ export function ImportCsv() {
   const skipped = useMemo(() => rows.filter((row) => row.skip), [rows])
   const invalidCount = rows.length - toImport.length - skipped.length
   const selectedCount = rows.filter((row) => row.selected).length
+
+  const duplicateCount = useMemo(
+    () => rows.filter((row) => row.isDuplicate).length,
+    [rows],
+  )
+  const mostlyDuplicated =
+    rows.length > 0 && duplicateCount / rows.length >= 0.8
+
+  // meses (YYYY-MM) das linhas importadas, mais recente primeiro
+  const importedMonths = useMemo(
+    () => [...new Set(toImport.map((row) => row.date.slice(0, 7)))].sort().reverse(),
+    [toImport],
+  )
 
   const runPreview = async (targetFile: File, overrides?: Partial<ColumnMapping>) => {
     setError(null)
@@ -223,6 +244,24 @@ export function ImportCsv() {
 
         {step === 2 && preview && mapping && (
           <>
+            {mostlyDuplicated && (
+              <div className="border-2 border-brass bg-brass/15 p-5">
+                <p className="font-serif text-base text-brass">
+                  Este arquivo parece já ter sido importado antes —{' '}
+                  <span className="font-mono">
+                    {duplicateCount} de {rows.length}
+                  </span>{' '}
+                  linhas já existem no seu histórico.
+                </p>
+                <p className="mt-2 text-sm text-ink-muted">
+                  As linhas duplicadas estão marcadas para serem puladas. Se a
+                  sua importação anterior "não apareceu", verifique o filtro de
+                  período em Transações antes de importar de novo — os dados
+                  podem estar em outro mês.
+                </p>
+              </div>
+            )}
+
             <div className="border border-hairline bg-card p-5">
               <h2 className="mb-3 font-serif text-sm tracking-wide text-ink-muted uppercase">
                 Mapeamento de colunas
@@ -544,11 +583,25 @@ export function ImportCsv() {
                 ))}
               </ul>
             )}
+            {importedMonths.length > 1 && (
+              <p className="text-sm text-ink-muted">
+                Os lançamentos importados cobrem mais de um mês:{' '}
+                {importedMonths.map(formatMonthLabel).join(', ')}. O link abaixo
+                abre o mais recente — use o filtro de período para ver os
+                demais.
+              </p>
+            )}
             <Link
-              to="/transacoes"
+              to={
+                importedMonths.length > 0
+                  ? `/transacoes?periodo=${importedMonths[0]}`
+                  : '/transacoes'
+              }
               className="bg-brass px-4 py-2 text-sm font-medium text-paper transition hover:bg-brass/90"
             >
-              Ver transações
+              {importedMonths.length > 0
+                ? `Ver transações de ${formatMonthLabel(importedMonths[0])}`
+                : 'Ver transações'}
             </Link>
           </div>
         )}

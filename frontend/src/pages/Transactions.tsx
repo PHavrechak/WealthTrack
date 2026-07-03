@@ -5,12 +5,13 @@ import {
   type ChangeEvent,
   type FormEvent,
 } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { AppLayout } from '../components/AppLayout'
 import { listCategories } from '../api/categories'
 import {
   createTransaction,
   deleteTransaction,
+  listTransactionMonths,
   listTransactions,
 } from '../api/transactions'
 import type { Category, CategoryType, Transaction } from '../types'
@@ -31,6 +32,24 @@ function formatMonthInputValue(month: number, year: number) {
   return `${year}-${String(month).padStart(2, '0')}`
 }
 
+function formatMonthLabel(yearMonth: string) {
+  const [year, month] = yearMonth.split('-').map(Number)
+  return new Date(year, month - 1, 1).toLocaleDateString('pt-BR', {
+    month: 'long',
+    year: 'numeric',
+  })
+}
+
+function parsePeriodParam(value: string | null) {
+  if (value && /^\d{4}-\d{2}$/.test(value)) {
+    const [year, month] = value.split('-').map(Number)
+    if (month >= 1 && month <= 12) {
+      return { month, year }
+    }
+  }
+  return null
+}
+
 function todayIsoDate() {
   return new Date().toISOString().slice(0, 10)
 }
@@ -39,8 +58,12 @@ const inputClass =
   'border border-hairline bg-paper px-3 py-2 text-ink outline-none focus:border-brass'
 
 export function Transactions() {
-  const [{ month, year }, setPeriod] = useState(currentPeriod)
+  const [searchParams] = useSearchParams()
+  const [{ month, year }, setPeriod] = useState(
+    () => parsePeriodParam(searchParams.get('periodo')) ?? currentPeriod(),
+  )
   const [transactions, setTransactions] = useState<Transaction[]>([])
+  const [monthsWithData, setMonthsWithData] = useState<string[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -89,12 +112,14 @@ export function Transactions() {
     setLoading(true)
     setError(null)
     try {
-      const [tx, cats] = await Promise.all([
+      const [tx, cats, months] = await Promise.all([
         listTransactions(targetMonth, targetYear),
         listCategories(),
+        listTransactionMonths(),
       ])
       setTransactions(tx)
       setCategories(cats)
+      setMonthsWithData(months)
     } catch (err) {
       setError(
         err instanceof Error ? err.message : 'Erro ao carregar transações.',
@@ -283,10 +308,37 @@ export function Transactions() {
         {loading ? (
           <p className="text-ink-muted">Carregando...</p>
         ) : transactions.length === 0 ? (
-          <p className="text-ink-muted">
-            Nenhum lançamento neste período. Registre o primeiro no formulário
-            acima.
-          </p>
+          monthsWithData.length === 0 ? (
+            <p className="text-ink-muted">
+              Você ainda não tem nenhum lançamento. Registre o primeiro no
+              formulário acima ou importe um extrato CSV.
+            </p>
+          ) : (
+            <div className="flex flex-col items-start gap-3 border border-hairline bg-card p-6">
+              <p className="text-ink-muted">
+                Nenhuma transação em{' '}
+                <span className="text-ink">
+                  {formatMonthLabel(formatMonthInputValue(month, year))}
+                </span>
+                . Você tem dados registrados em:
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {monthsWithData.map((yearMonth) => {
+                  const target = parsePeriodParam(yearMonth)
+                  return (
+                    <button
+                      key={yearMonth}
+                      type="button"
+                      onClick={() => target && setPeriod(target)}
+                      className="border border-hairline px-3 py-1.5 text-sm text-brass transition hover:border-brass"
+                    >
+                      {formatMonthLabel(yearMonth)}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          )
         ) : (
           <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
             <ul className="border border-hairline bg-card">

@@ -53,6 +53,21 @@ def list_transactions(
     return result.data
 
 
+@router.get("/months", response_model=list[str])
+def list_months_with_data(
+    user_id: str = Depends(get_current_user_id),
+    db: Client = Depends(get_supabase),
+):
+    """Meses ("YYYY-MM") em que o usuário tem ao menos uma transação, mais recente primeiro."""
+    rows = (
+        db.table("transactions")
+        .select("transaction_date")
+        .eq("user_id", user_id)
+        .execute()
+    ).data
+    return sorted({r["transaction_date"][:7] for r in rows}, reverse=True)
+
+
 @router.post(
     "", response_model=TransactionResponse, status_code=status.HTTP_201_CREATED
 )
