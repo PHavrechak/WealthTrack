@@ -3,8 +3,10 @@ import { NavLink } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
 function navLinkClass({ isActive }: { isActive: boolean }) {
-  return `text-sm transition ${
-    isActive ? 'font-medium text-white' : 'text-neutral-400 hover:text-neutral-200'
+  return `border-b pb-0.5 text-sm transition ${
+    isActive
+      ? 'border-brass text-ink'
+      : 'border-transparent text-ink-muted hover:text-ink'
   }`
 }
 
@@ -12,12 +14,10 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const { user, signOut } = useAuth()
 
   return (
-    <div className="flex min-h-screen flex-col bg-neutral-950 text-neutral-100">
-      <header className="flex items-center justify-between border-b border-neutral-800 px-6 py-4">
+    <div className="flex min-h-screen flex-col bg-paper text-ink">
+      <header className="flex items-center justify-between border-b border-hairline px-6 py-4">
         <div className="flex items-center gap-8">
-          <span className="text-lg font-semibold tracking-tight">
-            WealthTrack
-          </span>
+          <span className="font-serif text-lg tracking-tight">WealthTrack</span>
           <nav className="flex items-center gap-6">
             <NavLink to="/dashboard" className={navLinkClass}>
               Dashboard
@@ -31,11 +31,11 @@ export function AppLayout({ children }: { children: ReactNode }) {
           </nav>
         </div>
         <div className="flex items-center gap-4">
-          <span className="text-sm text-neutral-400">{user?.email}</span>
+          <span className="text-sm text-ink-muted">{user?.email}</span>
           <button
             type="button"
             onClick={() => signOut()}
-            className="rounded-lg border border-neutral-700 px-3 py-1.5 text-sm text-neutral-300 transition hover:border-neutral-500 hover:text-white"
+            className="border border-hairline px-3 py-1.5 text-sm text-ink-muted transition hover:border-ink-muted hover:text-ink"
           >
             Sair
           </button>

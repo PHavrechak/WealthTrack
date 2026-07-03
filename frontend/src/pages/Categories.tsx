@@ -4,6 +4,9 @@ import { createCategory, deleteCategory, listCategories } from '../api/categorie
 import { ApiError } from '../lib/apiClient'
 import type { Category, CategoryType } from '../types'
 
+const inputClass =
+  'border border-hairline bg-paper px-3 py-2 text-ink outline-none focus:border-brass'
+
 export function Categories() {
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
@@ -79,20 +82,20 @@ export function Categories() {
   return (
     <AppLayout>
       <div className="mx-auto flex max-w-4xl flex-col gap-8">
-        <h1 className="text-2xl font-semibold tracking-tight">Categorias</h1>
+        <h1 className="font-serif text-2xl tracking-tight">Categorias</h1>
 
         {error && (
-          <p className="rounded-lg border border-red-900 bg-red-950/50 px-4 py-2 text-sm text-red-400">
+          <p className="border border-negative/50 bg-negative/10 px-4 py-2 text-sm text-negative">
             {error}
           </p>
         )}
 
         <form
           onSubmit={handleSubmit}
-          className="flex flex-wrap items-end gap-3 rounded-2xl border border-neutral-800 bg-neutral-900 p-5"
+          className="flex flex-wrap items-end gap-3 border border-hairline bg-card p-5"
         >
           <div className="flex min-w-[180px] flex-1 flex-col gap-1.5">
-            <label htmlFor="category-name" className="text-sm text-neutral-300">
+            <label htmlFor="category-name" className="text-sm text-ink-muted">
               Nome
             </label>
             <input
@@ -100,18 +103,18 @@ export function Categories() {
               required
               value={name}
               onChange={(event) => setName(event.target.value)}
-              className="rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-neutral-100 outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500"
+              className={inputClass}
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="category-type" className="text-sm text-neutral-300">
+            <label htmlFor="category-type" className="text-sm text-ink-muted">
               Tipo
             </label>
             <select
               id="category-type"
               value={type}
               onChange={(event) => setType(event.target.value as CategoryType)}
-              className="rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-neutral-100 outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500"
+              className={inputClass}
             >
               <option value="income">Receita</option>
               <option value="expense">Despesa</option>
@@ -120,24 +123,26 @@ export function Categories() {
           <button
             type="submit"
             disabled={submitting}
-            className="rounded-lg bg-violet-600 px-4 py-2 font-medium text-white transition hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-60"
+            className="bg-brass px-4 py-2 text-sm font-medium text-paper transition hover:bg-brass/90 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {submitting ? 'Adicionando...' : 'Adicionar categoria'}
           </button>
         </form>
 
         {loading ? (
-          <p className="text-neutral-400">Carregando...</p>
+          <p className="text-ink-muted">Carregando...</p>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2">
             <CategoryColumn
               title="Receitas"
+              accentClass="text-positive"
               categories={incomeCategories}
               onDelete={handleDelete}
               deletingId={deletingId}
             />
             <CategoryColumn
               title="Despesas"
+              accentClass="text-negative"
               categories={expenseCategories}
               onDelete={handleDelete}
               deletingId={deletingId}
@@ -151,35 +156,39 @@ export function Categories() {
 
 function CategoryColumn({
   title,
+  accentClass,
   categories,
   onDelete,
   deletingId,
 }: {
   title: string
+  accentClass: string
   categories: Category[]
   onDelete: (category: Category) => void
   deletingId: string | null
 }) {
   return (
-    <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-5">
-      <h2 className="mb-4 text-sm font-medium uppercase tracking-wide text-neutral-400">
+    <div className="border border-hairline bg-card p-5">
+      <h2
+        className={`mb-4 font-serif text-sm tracking-wide uppercase ${accentClass}`}
+      >
         {title}
       </h2>
       {categories.length === 0 ? (
-        <p className="text-sm text-neutral-500">Nenhuma categoria cadastrada.</p>
+        <p className="text-sm text-ink-muted">Nenhuma categoria cadastrada.</p>
       ) : (
-        <ul className="flex flex-col gap-2">
+        <ul className="flex flex-col">
           {categories.map((category) => (
             <li
               key={category.id}
-              className="flex items-center justify-between rounded-lg border border-neutral-800 px-3 py-2"
+              className="flex items-center justify-between border-b border-hairline py-2.5 last:border-b-0"
             >
-              <span className="text-neutral-100">{category.name}</span>
+              <span className="text-ink">{category.name}</span>
               <button
                 type="button"
                 onClick={() => onDelete(category)}
                 disabled={deletingId === category.id}
-                className="text-sm text-red-400 transition hover:text-red-300 disabled:opacity-50"
+                className="text-sm text-ink-muted transition hover:text-negative disabled:opacity-50"
               >
                 {deletingId === category.id ? 'Excluindo...' : 'Excluir'}
               </button>

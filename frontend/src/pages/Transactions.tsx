@@ -34,6 +34,9 @@ function todayIsoDate() {
   return new Date().toISOString().slice(0, 10)
 }
 
+const inputClass =
+  'border border-hairline bg-paper px-3 py-2 text-ink outline-none focus:border-brass'
+
 export function Transactions() {
   const [{ month, year }, setPeriod] = useState(currentPeriod)
   const [transactions, setTransactions] = useState<Transaction[]>([])
@@ -136,10 +139,10 @@ export function Transactions() {
   return (
     <AppLayout>
       <div className="mx-auto flex max-w-4xl flex-col gap-8">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <h1 className="text-2xl font-semibold tracking-tight">Transações</h1>
+        <div className="flex flex-wrap items-baseline justify-between gap-4">
+          <h1 className="font-serif text-2xl tracking-tight">Transações</h1>
           <div className="flex items-center gap-2">
-            <label htmlFor="period" className="text-sm text-neutral-400">
+            <label htmlFor="period" className="text-sm text-ink-muted">
               Período
             </label>
             <input
@@ -147,23 +150,23 @@ export function Transactions() {
               type="month"
               value={formatMonthInputValue(month, year)}
               onChange={handlePeriodChange}
-              className="rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-neutral-100 outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500"
+              className={`${inputClass} font-mono`}
             />
           </div>
         </div>
 
         {error && (
-          <p className="rounded-lg border border-red-900 bg-red-950/50 px-4 py-2 text-sm text-red-400">
+          <p className="border border-negative/50 bg-negative/10 px-4 py-2 text-sm text-negative">
             {error}
           </p>
         )}
 
         <form
           onSubmit={handleSubmit}
-          className="flex flex-wrap items-end gap-3 rounded-2xl border border-neutral-800 bg-neutral-900 p-5"
+          className="flex flex-wrap items-end gap-3 border border-hairline bg-card p-5"
         >
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="tx-type" className="text-sm text-neutral-300">
+            <label htmlFor="tx-type" className="text-sm text-ink-muted">
               Tipo
             </label>
             <select
@@ -173,7 +176,7 @@ export function Transactions() {
                 setType(event.target.value as CategoryType)
                 setCategoryId('')
               }}
-              className="rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-neutral-100 outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500"
+              className={inputClass}
             >
               <option value="income">Receita</option>
               <option value="expense">Despesa</option>
@@ -181,14 +184,14 @@ export function Transactions() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="tx-category" className="text-sm text-neutral-300">
+            <label htmlFor="tx-category" className="text-sm text-ink-muted">
               Categoria
             </label>
             <select
               id="tx-category"
               value={categoryId}
               onChange={(event) => setCategoryId(event.target.value)}
-              className="rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-neutral-100 outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500"
+              className={inputClass}
             >
               <option value="">Sem categoria</option>
               {formCategories.map((category) => (
@@ -200,7 +203,7 @@ export function Transactions() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="tx-amount" className="text-sm text-neutral-300">
+            <label htmlFor="tx-amount" className="text-sm text-ink-muted">
               Valor
             </label>
             <input
@@ -211,12 +214,12 @@ export function Transactions() {
               required
               value={amount}
               onChange={(event) => setAmount(event.target.value)}
-              className="w-28 rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-neutral-100 outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500"
+              className={`${inputClass} w-28 font-mono`}
             />
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="tx-date" className="text-sm text-neutral-300">
+            <label htmlFor="tx-date" className="text-sm text-ink-muted">
               Data
             </label>
             <input
@@ -225,38 +228,41 @@ export function Transactions() {
               required
               value={transactionDate}
               onChange={(event) => setTransactionDate(event.target.value)}
-              className="rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-neutral-100 outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500"
+              className={`${inputClass} font-mono`}
             />
           </div>
 
           <div className="flex min-w-[160px] flex-1 flex-col gap-1.5">
-            <label htmlFor="tx-description" className="text-sm text-neutral-300">
+            <label htmlFor="tx-description" className="text-sm text-ink-muted">
               Descrição (opcional)
             </label>
             <input
               id="tx-description"
               value={description}
               onChange={(event) => setDescription(event.target.value)}
-              className="rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-neutral-100 outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500"
+              className={inputClass}
             />
           </div>
 
           <button
             type="submit"
             disabled={submitting}
-            className="rounded-lg bg-violet-600 px-4 py-2 font-medium text-white transition hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-60"
+            className="bg-brass px-4 py-2 text-sm font-medium text-paper transition hover:bg-brass/90 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {submitting ? 'Adicionando...' : 'Adicionar'}
           </button>
         </form>
 
         {loading ? (
-          <p className="text-neutral-400">Carregando...</p>
+          <p className="text-ink-muted">Carregando...</p>
         ) : transactions.length === 0 ? (
-          <p className="text-neutral-500">Nenhuma transação neste período.</p>
+          <p className="text-ink-muted">
+            Nenhum lançamento neste período. Registre o primeiro no formulário
+            acima.
+          </p>
         ) : (
-          <ul className="flex flex-col gap-2">
-            {transactions.map((transaction) => {
+          <ul className="border border-hairline bg-card">
+            {transactions.map((transaction, position) => {
               const category = transaction.category_id
                 ? categoriesById.get(transaction.category_id)
                 : undefined
@@ -264,38 +270,44 @@ export function Transactions() {
               return (
                 <li
                   key={transaction.id}
-                  className="flex items-center justify-between rounded-lg border border-neutral-800 bg-neutral-900 px-4 py-3"
+                  className="flex items-baseline gap-3 border-b border-hairline px-5 py-3 last:border-b-0"
                 >
-                  <div className="flex flex-col">
-                    <span className="text-neutral-100">
-                      {transaction.description || category?.name || 'Sem descrição'}
+                  <span className="font-mono text-xs text-ink-muted">
+                    {String(position + 1).padStart(2, '0')}
+                  </span>
+                  <div className="flex min-w-0 flex-col">
+                    <span className="truncate text-ink">
+                      {transaction.description ||
+                        category?.name ||
+                        'Sem descrição'}
                     </span>
-                    <span className="text-sm text-neutral-500">
+                    <span className="font-mono text-xs text-ink-muted">
                       {new Date(
                         `${transaction.transaction_date}T00:00:00`,
                       ).toLocaleDateString('pt-BR')}
                       {category ? ` · ${category.name}` : ''}
                     </span>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <span
-                      className={
-                        isIncome
-                          ? 'font-medium text-emerald-400'
-                          : 'font-medium text-red-400'
-                      }
-                    >
-                      {isIncome ? '+' : '-'} {formatCurrency(transaction.amount)}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => handleDelete(transaction)}
-                      disabled={deletingId === transaction.id}
-                      className="text-sm text-neutral-400 transition hover:text-red-400 disabled:opacity-50"
-                    >
-                      {deletingId === transaction.id ? 'Excluindo...' : 'Excluir'}
-                    </button>
-                  </div>
+                  <span
+                    aria-hidden
+                    className="mb-1 flex-1 self-end border-b border-dotted border-hairline"
+                  />
+                  <span
+                    className={`font-mono ${
+                      isIncome ? 'text-positive' : 'text-negative'
+                    }`}
+                  >
+                    {isIncome ? '+' : '−'}
+                    {formatCurrency(transaction.amount)}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleDelete(transaction)}
+                    disabled={deletingId === transaction.id}
+                    className="text-sm text-ink-muted transition hover:text-negative disabled:opacity-50"
+                  >
+                    {deletingId === transaction.id ? 'Excluindo...' : 'Excluir'}
+                  </button>
                 </li>
               )
             })}
